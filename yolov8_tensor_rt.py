@@ -15,17 +15,14 @@ torch.backends.cudnn.benchmark = True  # Auto-optimizes CUDA
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
 # ===== Model Setup =====
-# model = YOLO('yolov8n-pose.pt').to(device)
-# model.fuse()  # Fuse Conv+BN layers for speed
-# model.export(format='engine', half=True)  # 2-3x faster
 model = YOLO('yolov8n-pose.engine')
-print(f"Model path: {model.path}") 
+
 # ===== Screen Capture =====
 sct = mss()
-center_x, center_y = 1280, 720  # Adjust to your resolution
+center_x, center_y = 2560, 1440  # Adjust to your resolution
 region = {
-    "top": max(0, center_y - FOV//2),
-    "left": max(0, center_x - FOV//2),
+    "top": max(0, 2560 - FOV//2),
+    "left": max(0, 1440 - FOV//2),
     "width": min(FOV, 2560),
     "height": min(FOV, 1440)
 }
