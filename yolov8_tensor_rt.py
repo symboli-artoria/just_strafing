@@ -12,17 +12,15 @@ FOV = 160        # Smaller FOV = faster processing
 
 # ===== GPU Optimization =====
 torch.backends.cudnn.benchmark = True  # Auto-optimizes CUDA
-device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
 # ===== Model Setup =====
 model = YOLO('yolov8n-pose.engine')
-
 # ===== Screen Capture =====
 sct = mss()
-center_x, center_y = 2560, 1440  # Adjust to your resolution
+center_x, center_y = 1280, 720  # Adjust to your resolution
 region = {
-    "top": max(0, 2560 - FOV//2),
-    "left": max(0, 1440 - FOV//2),
+    "top": max(0, center_y - FOV//2),
+    "left": max(0, center_x - FOV//2),
     "width": min(FOV, 2560),
     "height": min(FOV, 1440)
 }
@@ -66,8 +64,14 @@ try:
         if ctypes.windll.user32.GetAsyncKeyState(TRIGGER_KEY):
             start_time = time.perf_counter()
             # 1. Fast screen capture
-            frame[:,:,:] = cv2.cvtColor(np.array(sct.grab(region)), cv2.COLOR_BGRA2BGR)
+            # frame[:,:,:] = cv2.cvtColor(np.array(sct.grab(region)), cv2.COLOR_BGRA2BGR)
             
+            # Pre-allocate once outside the loop
+            sct_img = np.array(sct.grab(region))
+
+            # Use in-place operations where possible
+            cv2.cvtColor(sct_img, cv2.COLOR_BGRA2BGR, dst=frame)
+
             # 2. GPU-accelerated inference
             results = model(frame, verbose=False, half=True, device='0')  # FP16 acceleration
             
@@ -87,7 +91,7 @@ try:
                 if abs(dx) > 2 or abs(dy) > 2:  # 2-pixel deadzone
                     move_mouse(dx, dy)
             
-            time.sleep(0.005)  # ~200Hz polling
+            time.sleep(0.002)  # ~200Hz polling
 
 finally:
     print("Script stopped")
