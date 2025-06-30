@@ -20,7 +20,7 @@ torch.backends.cudnn.benchmark = True  # Auto-optimizes CUDA
 
 # ===== Model Setup =====
 # Load original model
-if not os.path.exists('yolov8n-pose.engine'):
+if not os.path.exists('yolov8_20250629.engine'):
     print("Couldn't find engine, re-export model.")
     model = YOLO('yolov8_20250629.pt')
 
@@ -36,7 +36,7 @@ if not os.path.exists('yolov8n-pose.engine'):
         device=0          # GPU index
     )  # Saves as 'yolov8n-pose.engine'
 
-model = YOLO('yolov8n_20250629.engine')
+model = YOLO('yolov8_20250629.engine')
 
 # ===== Screen Capture =====
 sct = mss()
