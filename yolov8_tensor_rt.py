@@ -36,7 +36,7 @@ if not os.path.exists('yolov8n-pose.engine'):
         device=0          # GPU index
     )  # Saves as 'yolov8n-pose.engine'
 
-model = YOLO('yolov8n-pose.engine')
+model = YOLO('yolov8n_20250629.engine')
 
 # ===== Screen Capture =====
 sct = mss()
