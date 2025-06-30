@@ -5,6 +5,11 @@ from ultralytics import YOLO
 from mss import mss
 import ctypes
 import torch
+import os
+
+print(f"CUDA Available: {torch.cuda.is_available()}")
+print(f"GPU Count: {torch.cuda.device_count()}")
+print(f"Current Device: {torch.cuda.current_device() if torch.cuda.is_available() else 'N/A'}")
 
 # ===== Configuration =====
 TRIGGER_KEY = 0x02  # Right mouse
@@ -14,7 +19,25 @@ FOV = 160        # Smaller FOV = faster processing
 torch.backends.cudnn.benchmark = True  # Auto-optimizes CUDA
 
 # ===== Model Setup =====
+# Load original model
+if not os.path.exists('yolov8n-pose.engine'):
+    print("Couldn't find engine, re-export model.")
+    model = YOLO('yolov8_20250629.pt')
+
+    # Fuse Conv+BN layers (permanent in exported model)
+    model.fuse()  # Reduces layers by ~15%
+
+    # Export to TensorRT (saves optimized model)
+    model.export(
+        format='engine',  # TensorRT format
+        half=True,        # FP16 quantization (2x speed)
+        simplify=True,    # Simplify ONNX first
+        workspace=4,      # GPU memory in GB
+        device=0          # GPU index
+    )  # Saves as 'yolov8n-pose.engine'
+
 model = YOLO('yolov8n-pose.engine')
+
 # ===== Screen Capture =====
 sct = mss()
 center_x, center_y = 1280, 720  # Adjust to your resolution
